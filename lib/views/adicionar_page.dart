@@ -99,7 +99,7 @@ class _AdicionarPageState extends State<AdicionarPage> {
                       ),
                       validator: (String value) {
                         Pattern pattern =
-                            r"^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$";
+                            r"^[(http(s)?):\/\/(www\.)?a-zA-Z0-9-@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)$";
 
                         RegExp regex = new RegExp(pattern);
                         if (value.isNotEmpty && !regex.hasMatch(value)) {

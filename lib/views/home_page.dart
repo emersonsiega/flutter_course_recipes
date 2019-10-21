@@ -52,6 +52,15 @@ class _HomePageState extends State<HomePage> {
       ),
       subtitle: Text(receita.detalhes),
       isThreeLine: true,
+      onTap: () {
+        Navigator.of(context).pushNamed(
+          "detalhes",
+          arguments: {
+            "receita": receita,
+            "delete": _deleteReceita,
+          },
+        );
+      },
     );
   }
 
@@ -65,6 +74,12 @@ class _HomePageState extends State<HomePage> {
   void _addReceita(Receita receita) {
     setState(() {
       _receitas.add(receita);
+    });
+  }
+
+  void _deleteReceita(Receita receita) {
+    setState(() {
+      _receitas.remove(receita);
     });
   }
 }
