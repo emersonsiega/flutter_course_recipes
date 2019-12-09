@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_course_recipes/model/etapa_preparacao.dart';
+import 'package:flutter_course_recipes/model/ingrediente.dart';
 import 'package:flutter_course_recipes/model/receita.dart';
+import 'package:flutter_course_recipes/views/preparo_tile.dart';
+
+import 'ingrediente_tile.dart';
 
 class AdicionarPage extends StatefulWidget {
   @override
@@ -20,6 +25,8 @@ class _AdicionarPageState extends State<AdicionarPage> {
   final _formKey = GlobalKey<FormState>();
 
   Function _salvar;
+  List<Ingrediente> _ingredientes = List();
+  List<EtapaPreparacao> _preparo = List();
 
   @override
   void initState() {
@@ -48,8 +55,7 @@ class _AdicionarPageState extends State<AdicionarPage> {
         onTap: () => _focus(FocusNode()),
         child: Container(
           child: SingleChildScrollView(
-            padding:
-                const EdgeInsets.symmetric(vertical: 32.0, horizontal: 16.0),
+            padding: const EdgeInsets.fromLTRB(16, 32, 16, 70),
             child: Form(
               key: _formKey,
               child: Column(
@@ -114,31 +120,61 @@ class _AdicionarPageState extends State<AdicionarPage> {
                       onEditingComplete: () => _focus(_receitaFocus),
                     ),
                   ),
-                  Padding(
-                    padding: EdgeInsets.only(top: 8.0),
-                    child: TextFormField(
-                      decoration: InputDecoration(
-                        labelText: "Ingredientes e preparo *",
-                        helperText: " ",
+                  Row(
+                    children: <Widget>[
+                      Text("Ingredientes"),
+                      IconButton(
+                        icon: Icon(
+                          Icons.add_circle,
+                          color: Colors.green,
+                        ),
+                        onPressed: () => _addIngrediente(),
                       ),
-                      validator: (String valor) {
-                        if (valor.isEmpty) {
-                          return "Informe a receita";
-                        }
+                    ],
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisSize: MainAxisSize.max,
+                    children: _ingredientes.map((ingrediente) {
+                      return IngredienteTile(
+                        key: Key(ingrediente.id.toString()),
+                        onChanged: (value) {
+                          ingrediente.nome = value;
 
-                        if (valor.length < 20) {
-                          return "Receita muito curta";
-                        }
+                          _updateIngrediente(ingrediente);
+                        },
+                        ingrediente: ingrediente,
+                        onRemove: _onRemoveIngrediente,
+                      );
+                    }).toList(),
+                  ),
+                  Row(
+                    children: <Widget>[
+                      Text("Preparação"),
+                      IconButton(
+                        icon: Icon(
+                          Icons.add_circle,
+                          color: Colors.green,
+                        ),
+                        onPressed: () => _addEtapaPreparacao(),
+                      ),
+                    ],
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisSize: MainAxisSize.max,
+                    children: _preparo.map((preparo) {
+                      return PreparoTile(
+                        key: Key(preparo.id.toString()),
+                        onChanged: (value) {
+                          preparo.descricao = value;
 
-                        return null;
-                      },
-                      maxLines: null,
-                      minLines: 6,
-                      focusNode: _receitaFocus,
-                      controller: _receitaController,
-                      keyboardType: TextInputType.multiline,
-                      textInputAction: TextInputAction.newline,
-                    ),
+                          _updatePreparo(preparo);
+                        },
+                        preparo: preparo,
+                        onRemove: _onRemovePreparo,
+                      );
+                    }).toList(),
                   ),
                 ],
               ),
@@ -153,14 +189,76 @@ class _AdicionarPageState extends State<AdicionarPage> {
     );
   }
 
+  void _addIngrediente() {
+    if (_ingredientes.isEmpty || _ingredientes.last.nome.isNotEmpty) {
+      setState(() {
+        _ingredientes.add(Ingrediente());
+      });
+    }
+  }
+
+  void _onRemoveIngrediente(int id) {
+    setState(() {
+      _ingredientes.removeWhere((ing) => ing.id == id);
+    });
+  }
+
+  void _updateIngrediente(Ingrediente ingrediente) {
+    setState(() {
+      _ingredientes.map((ing) {
+        if (ing.id == ingrediente.id) {
+          return ingrediente;
+        }
+
+        return ing;
+      });
+    });
+  }
+
+  void _addEtapaPreparacao() {
+    if (_preparo.isEmpty || _preparo.last.descricao.isNotEmpty) {
+      setState(() {
+        _preparo.add(EtapaPreparacao());
+      });
+    }
+  }
+
+  void _onRemovePreparo(int id) {
+    setState(() {
+      _preparo.removeWhere((ing) => ing.id == id);
+    });
+  }
+
+  void _updatePreparo(EtapaPreparacao etapa) {
+    setState(() {
+      _preparo.map((e) {
+        if (e.id == etapa.id) {
+          return etapa;
+        }
+
+        return e;
+      });
+    });
+  }
+
   void _salvarReceita() {
+    setState(() {
+      _ingredientes.removeWhere((ing) => ing.nome.isEmpty);
+      _preparo.removeWhere((prep) => prep.descricao.isEmpty);
+    });
+
+    if (_preparo.isEmpty || _ingredientes.isEmpty) {
+      return;
+    }
+
     //Se for válido, permite salvar...
     if (_formKey.currentState.validate()) {
       final receita = Receita(
         nome: _nomeController.text,
         detalhes: _detalhesController.text,
         imagemURL: _imagemController.text,
-        receita: _receitaController.text,
+        ingredientes: _ingredientes,
+        preparo: _preparo,
       );
 
       _salvar(receita);

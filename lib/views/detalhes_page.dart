@@ -12,7 +12,8 @@ class _DetalhesPageState extends State<DetalhesPage> {
 
   final _nomeController = TextEditingController();
   final _detalhesController = TextEditingController();
-  final _receitaController = TextEditingController();
+  final _ingredientesController = TextEditingController();
+  final _preparoController = TextEditingController();
 
   @override
   void initState() {
@@ -30,7 +31,8 @@ class _DetalhesPageState extends State<DetalhesPage> {
 
       _nomeController.text = _receita.nome;
       _detalhesController.text = _receita.detalhes;
-      _receitaController.text = _receita.receita;
+      _ingredientesController.text = _receita.getListaIngredientes();
+      _preparoController.text = _receita.getListaPreparo();
     });
   }
 
@@ -83,11 +85,23 @@ class _DetalhesPageState extends State<DetalhesPage> {
                   padding: EdgeInsets.only(top: 8.0),
                   child: TextFormField(
                     decoration: InputDecoration(
-                      labelText: "Ingredientes e preparo *",
+                      labelText: "Ingredientes",
                       helperText: " ",
                     ),
                     maxLines: null,
-                    controller: _receitaController,
+                    controller: _ingredientesController,
+                    readOnly: true,
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.only(top: 8.0),
+                  child: TextFormField(
+                    decoration: InputDecoration(
+                      labelText: "Preparo",
+                      helperText: " ",
+                    ),
+                    maxLines: null,
+                    controller: _preparoController,
                     readOnly: true,
                   ),
                 ),

@@ -1,20 +1,53 @@
+import 'etapa_preparacao.dart';
+import 'ingrediente.dart';
+
 class Receita {
   int id;
   String nome;
   String detalhes;
   String imagemURL;
-  String receita;
+  List<Ingrediente> ingredientes;
+  List<EtapaPreparacao> preparo;
 
   Receita({
     this.id,
     this.nome: "",
     this.detalhes: "",
     this.imagemURL: "",
-    this.receita: "",
+    this.ingredientes,
+    this.preparo,
   }) {
     if (this.id == null) {
       this.id = DateTime.now().millisecondsSinceEpoch;
     }
+
+    if (this.ingredientes == null) {
+      this.ingredientes = List();
+    }
+
+    if (this.preparo == null) {
+      this.preparo = List();
+    }
+  }
+
+  String getListaIngredientes() {
+    String lista = "";
+
+    ingredientes.forEach((ingrediente) {
+      lista += ingrediente.nome + "\n";
+    });
+
+    return lista;
+  }
+
+  String getListaPreparo() {
+    String lista = "";
+
+    preparo.forEach((preparo) {
+      lista += preparo.descricao + "\n";
+    });
+
+    return lista;
   }
 
   Receita.fromJson(Map<String, dynamic> json) {
@@ -22,7 +55,16 @@ class Receita {
     nome = json['nome'];
     detalhes = json['detalhes'];
     imagemURL = json['imagemURL'];
-    receita = json['receita'];
+
+    final ings = List<Map<String, dynamic>>.from(json['ingredientes']);
+    ingredientes = ings.map((ingrediente) {
+      return Ingrediente.fromJson(ingrediente);
+    }).toList();
+
+    final prep = List<Map<String, dynamic>>.from(json['preparo']);
+    preparo = prep.map((etapa) {
+      return EtapaPreparacao.fromJson(etapa);
+    }).toList();
   }
 
   Map<String, dynamic> toJson() {
@@ -32,7 +74,12 @@ class Receita {
     data['nome'] = this.nome;
     data['detalhes'] = this.detalhes;
     data['imagemURL'] = this.imagemURL;
-    data['receita'] = this.receita;
+
+    final ing = this.ingredientes.map((ing) => ing.toJson()).toList();
+    data['ingredientes'] = ing;
+
+    final prep = this.preparo.map((pre) => pre.toJson()).toList();
+    data['preparo'] = prep;
 
     return data;
   }
