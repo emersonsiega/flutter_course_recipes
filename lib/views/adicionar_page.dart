@@ -1,4 +1,6 @@
+import 'package:bloc_pattern/bloc_pattern.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_course_recipes/blocs/receitas_bloc.dart';
 import 'package:flutter_course_recipes/model/etapa_preparacao.dart';
 import 'package:flutter_course_recipes/model/ingrediente.dart';
 import 'package:flutter_course_recipes/model/receita.dart';
@@ -15,7 +17,6 @@ class _AdicionarPageState extends State<AdicionarPage> {
   final _nomeController = TextEditingController();
   final _detalhesController = TextEditingController();
   final _imagemController = TextEditingController();
-  final _receitaController = TextEditingController();
 
   final _nomeFocus = FocusNode();
   final _detalhesFocus = FocusNode();
@@ -24,7 +25,6 @@ class _AdicionarPageState extends State<AdicionarPage> {
 
   final _formKey = GlobalKey<FormState>();
 
-  Function _salvar;
   List<Ingrediente> _ingredientes = List();
   List<EtapaPreparacao> _preparo = List();
 
@@ -33,16 +33,6 @@ class _AdicionarPageState extends State<AdicionarPage> {
     super.initState();
 
     Future.delayed(Duration.zero, () => _focus(_nomeFocus));
-
-    Future.delayed(Duration.zero, _loadArguments);
-  }
-
-  void _loadArguments() {
-    Map args = ModalRoute.of(context).settings.arguments;
-
-    setState(() {
-      _salvar = args["salvar"];
-    });
   }
 
   @override
@@ -261,7 +251,9 @@ class _AdicionarPageState extends State<AdicionarPage> {
         preparo: _preparo,
       );
 
-      _salvar(receita);
+      final bloc = BlocProvider.getBloc<ReceitasBloc>();
+      bloc.addReceita(receita);
+
       Navigator.pop(context);
     }
   }
