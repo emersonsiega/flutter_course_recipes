@@ -1,4 +1,6 @@
+import 'package:bloc_pattern/bloc_pattern.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_course_recipes/blocs/receitas_bloc.dart';
 import 'package:flutter_course_recipes/model/receita.dart';
 
 class DetalhesPage extends StatefulWidget {
@@ -8,7 +10,6 @@ class DetalhesPage extends StatefulWidget {
 
 class _DetalhesPageState extends State<DetalhesPage> {
   Receita _receita;
-  Function _delete;
 
   final _nomeController = TextEditingController();
   final _detalhesController = TextEditingController();
@@ -23,11 +24,8 @@ class _DetalhesPageState extends State<DetalhesPage> {
   }
 
   void _loadArguments() {
-    Map args = ModalRoute.of(context).settings.arguments;
-
     setState(() {
-      _receita = args["receita"];
-      _delete = args["delete"];
+      _receita = ModalRoute.of(context).settings.arguments;
 
       _nomeController.text = _receita.nome;
       _detalhesController.text = _receita.detalhes;
@@ -114,7 +112,9 @@ class _DetalhesPageState extends State<DetalhesPage> {
   }
 
   void _onDelete() {
-    _delete(_receita);
+    final bloc = BlocProvider.getBloc<ReceitasBloc>();
+    bloc.deleteReceita(_receita);
+
     Navigator.of(context).pop();
   }
 }
