@@ -1,6 +1,7 @@
+import 'package:bloc_pattern/bloc_pattern.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_course_recipes/blocs/receitas_bloc.dart';
 import 'package:flutter_course_recipes/model/receita.dart';
-import 'package:flutter_course_recipes/service/receita_service.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -8,9 +9,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List<Receita> _receitas = List();
   bool _loading = true;
-  ReceitaService _service = ReceitaService();
+  final _bloc = BlocProvider.getBloc<ReceitasBloc>();
 
   @override
   void initState() {
@@ -20,21 +20,11 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _carregarReceitas() async {
-    try {
-      final receitas = await _service.carregar();
+    await _bloc.carregarReceitas();
 
-      setState(() {
-        _receitas = receitas;
-        _loading = false;
-      });
-    } catch (e) {
-      print("ERROR: ${e.toString()}");
-
-      setState(() {
-        _receitas = List();
-        _loading = false;
-      });
-    }
+    setState(() {
+      _loading = false;
+    });
   }
 
   @override
@@ -43,20 +33,40 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: Text("Minhas receitas"),
       ),
-      body: Container(
-        child: this._loading
-            ? CircularProgressIndicator()
-            : ListView.separated(
-                padding: const EdgeInsets.symmetric(
-                    vertical: 32.0, horizontal: 16.0),
-                itemCount: _receitas.length,
-                itemBuilder: (context, index) {
-                  return _buildReceita(index);
-                },
-                separatorBuilder: (context, index) {
-                  return Divider();
-                },
+      body: StreamBuilder<List<Receita>>(
+        stream: _bloc.receitasStream(),
+        builder: (context, snapshot) {
+          if (this._loading) {
+            return CircularProgressIndicator();
+          }
+
+          if (!snapshot.hasData || snapshot.data.isEmpty) {
+            return Center(
+              child: Text(
+                "Nenhuma receita cadastrada",
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.display1,
               ),
+            );
+          }
+
+          return Container(
+            child: ListView.separated(
+              padding: const EdgeInsets.symmetric(
+                vertical: 32.0,
+                horizontal: 16.0,
+              ),
+              itemCount: snapshot.data.length,
+              itemBuilder: (context, index) {
+                Receita receita = snapshot.data[index];
+                return _buildReceita(receita);
+              },
+              separatorBuilder: (context, index) {
+                return Divider();
+              },
+            ),
+          );
+        },
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _criarReceita,
@@ -65,9 +75,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildReceita(int index) {
-    Receita receita = _receitas[index];
-
+  Widget _buildReceita(Receita receita) {
     return ListTile(
       key: Key(receita.id.toString()),
       title: Text(
@@ -79,35 +87,13 @@ class _HomePageState extends State<HomePage> {
       onTap: () {
         Navigator.of(context).pushNamed(
           "detalhes",
-          arguments: {
-            "receita": receita,
-            "delete": _deleteReceita,
-          },
+          arguments: receita,
         );
       },
     );
   }
 
   void _criarReceita() {
-    Navigator.of(context).pushNamed(
-      "adicionar",
-      arguments: {"salvar": _addReceita},
-    );
-  }
-
-  void _addReceita(Receita receita) {
-    setState(() {
-      _receitas.add(receita);
-
-      _service.salvar(_receitas);
-    });
-  }
-
-  void _deleteReceita(Receita receita) {
-    setState(() {
-      _receitas.remove(receita);
-
-      _service.salvar(_receitas);
-    });
+    Navigator.of(context).pushNamed("adicionar");
   }
 }

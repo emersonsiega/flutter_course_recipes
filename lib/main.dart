@@ -1,4 +1,6 @@
+import 'package:bloc_pattern/bloc_pattern.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_course_recipes/blocs/receitas_bloc.dart';
 import 'package:flutter_course_recipes/views/adicionar_page.dart';
 import 'package:flutter_course_recipes/views/detalhes_page.dart';
 import 'package:flutter_course_recipes/views/home_page.dart';
@@ -8,17 +10,22 @@ void main() => runApp(MyApp());
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: "Recipes",
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primaryColor: Color(0xff9C62C0),
-        accentColor: Color(0xff9C62C0),
-        inputDecorationTheme: InputDecorationTheme(
-          border: OutlineInputBorder(),
+    return BlocProvider(
+      blocs: [
+        Bloc((_) => ReceitasBloc()),
+      ],
+      child: MaterialApp(
+        title: "Recipes",
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          primaryColor: Color(0xff9C62C0),
+          accentColor: Color(0xff9C62C0),
+          inputDecorationTheme: InputDecorationTheme(
+            border: OutlineInputBorder(),
+          ),
         ),
+        routes: _buildRoutes(),
       ),
-      routes: _buildRoutes(),
     );
   }
 
